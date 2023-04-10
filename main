@@ -1,0 +1,57 @@
+"""
+In this project, we will be using OCR to extract text from a screenshot the user takes
+using the help of pytesseract for OCR and pyautogui with PIL for screenshotting
+"""
+
+import pytesseract as pytess
+import pyautogui as pt
+from PIL import Image
+from PIL import ImageGrab
+from keyboard import is_pressed
+from time import sleep
+
+print('Simple Text Extractor:\nshift + s to take the screen shot\nput your cursor left to right\n'
+      'Repostion your cursor to the bottom right corner and wait for 3 seconds\nIf mode is html, open Results.html to see text\n')
+mode = input('1: console\n2: html\n')  # Determine if user wants the text in console or html
+
+
+def screen_shot():
+    x, y = pt.position()
+    print('RePos your cursor')
+    sleep(3)
+    new_x, new_y = pt.position()
+
+    image = ImageGrab.grab(bbox=(x, y, new_x, new_y))
+    image.save(r'Img.png')
+
+
+def print_grabbed_text():
+    img = Image.open('Img.png')
+    text = pytess.image_to_string(img)
+
+    if mode == '2':
+        # Format text as HTML
+        html_text = f"<html><body><pre><h2>{text}</h2></pre></body></html>"
+
+        with open("Results.html", "w") as website:
+            website.write(html_text)
+
+    else:
+        print('\n')
+        print(text)
+        print('\n')
+
+
+while True:
+    if is_pressed('shift+s'):  # Hotkey to run the main code
+        try:
+            screen_shot()
+            print_grabbed_text()
+
+        except ValueError:  # if Coordinate 'right' is less than 'left'
+
+            print("Error: Right coordinate is less than left coordinate. Please retry with correct coordinates.")
+
+        except Exception as e:
+
+            print(f"Error: {e}. Something went wrong. Please check your input and try again.")
